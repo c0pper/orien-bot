@@ -4,6 +4,7 @@ import random
 import logging
 import rx
 from telegram import Update
+# noinspection PyUnresolvedReferences
 from telegram.ext import Updater, Dispatcher, CommandHandler, MessageHandler, Filters, CallbackContext
 
 # Enable logging
