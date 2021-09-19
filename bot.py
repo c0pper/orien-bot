@@ -17,12 +17,14 @@ with open(picfile) as p, open(quotefile) as q:
 
 @bot.message_handler(commands=['lattosio'])
 def send_rand_photo(message):
+    print("photo")
     photo = random.choice(plines)
     bot.send_photo(message.chat.id, photo, random.choice(qlines))
 
 
 @bot.message_handler(commands=['cheesecake'])
 def send_rand_quote(message):
+    print("quote")
     quote = random.choice(qlines)
     bot.send_message(message.chat.id, quote)
 
