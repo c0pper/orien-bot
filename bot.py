@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 HEROKU_URL = "https://orien-bot.herokuapp.com/"
 PORT = int(os.environ.get('PORT', 17995))
-TELE_TOKEN = os.environ.get('bot-token')
+TELE_TOKEN = "720027725:AAHk6fJmTBABbjMzKBdkPxaqtM-K9piyT7w" #os.environ.get('oribot-token')
 
 # Assets
 
