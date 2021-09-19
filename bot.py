@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 HEROKU_URL = "https://orien-bot.herokuapp.com/"
 PORT = int(os.environ.get('PORT', '8433'))
-TELE_TOKEN = "720027725:AAGqiLodtZ1KtXdVqyFcn4rYGQ2xEupYJdY" #os.environ.get('bot-token')
+TELE_TOKEN = os.environ.get('bot-token')
 
 # Assets
 
@@ -62,11 +62,11 @@ def main():
     dp.add_handler(MessageHandler(Filters.text & Filters.regex(rx.trigger_regex) & ~Filters.command, userText))
 
     # starting the bot
-    updater.start_polling()
-    # updater.start_webhook(listen="0.0.0.0",
-    #                       port=PORT,
-    #                       url_path=TELE_TOKEN,
-    #                       webhook_url=HEROKU_URL + TELE_TOKEN)
+    # updater.start_polling()
+    updater.start_webhook(listen="0.0.0.0",
+                          port=PORT,
+                          url_path=TELE_TOKEN,
+                          webhook_url=HEROKU_URL + TELE_TOKEN)
     updater.idle()
 
 
