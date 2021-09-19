@@ -1,0 +1,1 @@
+trigger_regex = r'(?i)orien'

@@ -1,11 +1,22 @@
-import telebot
-import random
-from flask import Flask, request
 import os
+import json
+import random
+import logging
+import rx
+from telegram import Update
+from telegram.ext import Updater, Dispatcher, CommandHandler, MessageHandler, Filters, CallbackContext
 
-bot_token = os.environ.get('bot_token')
-bot = telebot.TeleBot(token=bot_token)
-server = Flask(__name__)
+# Enable logging
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+
+HEROKU_URL = "https://orien-bot.herokuapp.com/"
+PORT = int(os.environ.get('PORT', '8433'))
+TELE_TOKEN = os.environ.get('bot-token')
+
+# Assets
 
 picfile = 'pics.txt'
 quotefile = 'quotes.txt'
@@ -15,38 +26,49 @@ with open(picfile) as p, open(quotefile) as q:
     qlines = q.readlines()
 
 
-@bot.message_handler(commands=['lattosio'])
-def send_rand_photo(message):
-    print("photo")
+# Define Command Handlers
+def start(update: Update, context: CallbackContext):
+    """Handler for /start command"""
+    update.message.reply_text('we')
+
+
+def userText(update: Update, context: CallbackContext):
+    """Function to reply to user text"""
+    quote = random.choice(qlines)
+    update.message.reply_text(quote)
+
+
+# def send_audio(update: Update, context: CallbackContext) -> None:
+#     audio = random.choice(alines)
+#     update.message.reply_voice(audio)
+
+
+def send_rand_photo(update: Update, context: CallbackContext) -> None:
     photo = random.choice(plines)
-    bot.send_photo(message.chat.id, photo, random.choice(qlines))
+    update.message.reply_photo(photo, random.choice(qlines))
 
 
-@bot.message_handler(commands=['cheesecake'])
-def send_rand_quote(message):
-    print("quote")
-    quote = random.choice(qlines)
-    bot.send_message(message.chat.id, quote)
+def main():
+    """starting bot"""
+    updater = Updater(TELE_TOKEN, use_context=True)
+
+    # getting the dispatchers to register handlers
+    dp = updater.dispatcher
+
+    # registering commands
+    dp.add_handler(CommandHandler("start", start))
+    dp.add_handler(CommandHandler("lattosio", send_rand_photo))
+    # registering Message Handler to reply to user messages
+    dp.add_handler(MessageHandler(Filters.text & Filters.regex(rx.trigger_regex) & ~Filters.command, userText))
+
+    # starting the bot
+    # updater.start_polling()
+    updater.start_webhook(listen="0.0.0.0",
+                          port=PORT,
+                          url_path=TELE_TOKEN,
+                          webhook_url=HEROKU_URL + TELE_TOKEN)
+    updater.idle()
 
 
-@bot.message_handler(func=lambda msg: msg.text is not None and 'orien' in msg.text)
-def at_answer(message):
-    quote = random.choice(qlines)
-    bot.reply_to(message, quote)
-
-
-@server.route('/' + bot_token, methods=['POST'])
-def getMessage():
-    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
-    return "!", 200
-
-
-@server.route("/")
-def webhook():
-    bot.remove_webhook()
-    bot.set_webhook(url='https://orien-bot.herokuapp.com/' + bot_token)
-    return "!", 200
-
-
-if __name__ == "__main__":
-    server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+if __name__ == '__main__':
+    main()
